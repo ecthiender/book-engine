@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "ISBN" : "",
+    "Title" : "",
+    "Author" : "",
+    "Publisher"  : "",
+    "Edition" : "",
+    "Reprint" : "",
+    "Description" : "",
+    "dimensions": [0.5, 2, 1.5],
+    "position": [0.96, 1.86, -1],
+    "faces": ["images/a_farewell_to_arms.jpg", "images/a_farewell_to_arms.jpg", "images/a_farewell_to_arms.jpg"],
+    "type": "paperback",
+    "url": "http://www.archive.org/stream/farewelltoarms01hemi#page/n5/mode/2up"
+  },
+  {
+    "id": 2,
+    "ISBN" : "",
+    "Title" : "",
+    "Author" : "",
+    "Publisher"  : "",
+    "Edition" : "",
+    "Reprint" : "",
+    "Description" : "",
+    "dimensions": [0.08, 0.45, 0.4],
+    "position": [0.96, 1.86, -0.8],
+    "faces": ["images/gitanjali.jpg", "images/gitanjali.jpg", "images/gitanjali.jpg"],
+    "type": "paperback",
+    "url": "http://www.archive.org/stream/gitanjaliandfrui00tagouoft#page/n7/mode/2up"
+  },
+  {
+    "id": 3,
+    "ISBN" : "",
+    "Title" : "",
+    "Author" : "",
+    "Publisher"  : "",
+    "Edition" : "",
+    "Reprint" : "",
+    "Description" : "",
+    "dimensions": [0.07, 0.45, 0.3],
+    "position": [0.8, 1.28, -3.1],
+    "rotation": [0, 0, 1.57],
+    "faces": ["images/hawthorne.jpg", "images/hawthorne.jpg", "images/hawthorne.jpg"],
+    "type": "paperback",
+    "url": "http://www.archive.org/stream/hawthorne00jame#page/n7/mode/2up"
+  }
+]
