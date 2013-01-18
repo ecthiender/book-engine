@@ -3,9 +3,35 @@
 <head>
     <title>Book Engine</title>
     <meta charset="utf-8"/>
+    <style>
+      body {
+        background-color: #aaa;
+      }
+    </style>
 </head>
 <body>
   <div id="loading">Loading. Please wait...</div>
+  <div id="controls" style="position:absolute;z-index:1000">
+    <input type="button" id="flipleft" value="flipLeft" />
+    <br />
+    <input type="button" id="flipright" value="flipRight" />
+  </div>
+  <script>
+    if (!window.requestAnimationFrame) {
+
+      window.requestAnimationFrame = (function() {
+
+        return window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+    }
+  </script>
+
   <script>
     window.BE = window.BE || {};
     window.onload = function() {
@@ -15,9 +41,15 @@
   <!--script src="js/lib/jquery-1.9.0.js"></script-->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
   <script src="js/lib/Detector.js"></script>
-  <script src="js/lib/three.js"></script>
-  <script src="js/lib/physi.js"></script>
+  <!--script src="js/lib/three.js"></script>
+  <script src="js/lib/physi.js"></script-->
+  <script type="text/javascript" src="js/lib/three.r46.js"></script>
   <script src="js/lib/Three.FirstPersonControls.js"></script>
+  <!--script src="js/lib/threex.domevent.js"></script>
+  <script src="js/lib/threex.domevent.object3d.js"></script-->
+  <script type="text/javascript" src="js/lib/MOD3.js"></script>
+  <script type="text/javascript" src="js/lib/Tween.js"></script>
+  <script type="text/javascript" src="js/FlipBook3D.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
