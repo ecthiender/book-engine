@@ -1,58 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>FlipBook3D with Three.js MOD3.js and Tween.js</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	  <style>
-	    /*body {
-	      background-color:#121212;
-	    }*/
-	  </style>
-    <script type="text/javascript" src="js/lib/three.r46.js"></script>
-    <script src="js/lib/Three.FirstPersonControls.js"></script>
-    <script type="text/javascript" src="js/lib/MOD3.js"></script>
-    <script type="text/javascript" src="js/lib/Tween.js"></script>
-    <script type="text/javascript" src="js/FlipBook3D.js"></script>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>FlipBook3D with Three.js MOD3.js and Tween.js</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+	body
+	{
+	 background-color:#121212;
+	}
+	</style>
+  <!--script src="../jquery-1.9.0.js"></script-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+	<script type="text/javascript" src="js/lib/three.r46.js"></script>
+	<script type="text/javascript" src="js/lib/MOD3.js"></script>
+	<script type="text/javascript" src="js/lib/Tween.js"></script>
+	<script type="text/javascript" src="js/lib/reqanim.js"></script>
+	<script type="text/javascript" src="js/FlipBook3D.js"></script>
 	</head>
 	<body>
-
 		<div id="controls" style="position:absolute;z-index:1000">
-		  <input type="button" id="flipleft" value="flipLeft" />
-		  <br />
-		  <input type="button" id="flipright" value="flipRight" />
+		<input type="button" id="flipleft" value="flipLeft" />
+		<br />
+		<input type="button" id="flipright" value="flipRight" />
 		</div>
-		<!--div id="container" style="position:relative;margin:0 auto;padding:0;z-index:0;cursor:pointer;"></div-->
-
+		<div id="container" style="position:relative;margin:0 auto;padding:0;z-index:0;cursor:pointer;"></div>
 		<script>
-      if (!window.requestAnimationFrame) {
-
-        window.requestAnimationFrame = (function() {
-
-          return window.webkitRequestAnimationFrame ||
-          window.mozRequestAnimationFrame ||
-          window.oRequestAnimationFrame ||
-          window.msRequestAnimationFrame ||
-          function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-            window.setTimeout(callback, 1000 / 60);
-          };
-        })();
-      }
-
-
 			var container;
-			var camera, scene, renderer, projector, light;
-      var clock, thetaD, deltaX, old_mouseX;
-      var controls;
-      var MOVESPEED = 200, ACTUAL_LOOK_SPEED = 0.1;
+			var camera, scene, renderer, projector;
 
 			var targetRotationY = 0;
 			var targetRotationOnMouseDownY = 0;
 			var targetRotationX = 0;
 			var targetRotationOnMouseDownX = 0;
-			var rad = 700;
-			var mouse = {x:0,y:0};
+			var rad=700;
+			var mouse={x:0,y:0};
 			var mouseX = 0;
 			var mouseXOnMouseDown = 0;
 			var mouseY = 0;
@@ -61,202 +43,171 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 			var w,h,w2,h2;
-      var images = [
-        {f:"images/fcover.png",b:"images/pg0.jpg", hard:1},
-			  {f:"images/pg1.jpg",b:"images/pg2.jpg",hard:0},
-			  {f:"images/pg3.jpg", b:"images/pg4.jpg" ,hard:0},
-			  //{f:"img/catalog_11.jpg" ,b:"img/catalog_12.jpg", hard:0},
-			  //{f:"img/catalog_09.jpg", b:"img/catalog_07.jpg", hard:0},
-			  //{f:"img/catalog_06.jpg", b:"img/catalog_01.jpg", hard:0},
-			  {f:"images/pg5.jpg", b:"images/bcover.png",hard:1}
-      ];
-			var book;
-			var pagew = 200, pageh = pagew * 10 / 7;
-			var fl, fr;
-      var loaded_models = [];
+			var images=[{f:"img/catalog_13.jpg",b:"img/mag_page9.jpg", hard:1},
+			{f:"img/catalog_06.jpg",b:"img/catalog_05.jpg",hard:0},
+			{f:"img/catalog_05.jpg", b:"img/catalog_11.jpg" ,hard:0},
+			/*{f:"img/catalog_11.jpg" ,b:"img/catalog_12.jpg", hard:0},
+			{f:"img/catalog_09.jpg", b:"img/catalog_07.jpg", hard:0},
+			{f:"img/catalog_06.jpg", b:"img/catalog_01.jpg", hard:0},*/
+			{f:"img/catalog_04.jpg", b:"img/catalog_08.jpg",hard:1}];
+			var book, test_book;
+			var pagew=300;
+			var pageh=pagew*10/7;
+			var fl,fr;
 
-      new THREE.JSONLoader().load('models/table.js', function(geometry) {
-        var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial());
-        mesh.scale.set(100, 100, 100);
-        loaded_models.push(mesh);
+      var max_allowed_pages = 20;
+      var max_pages;
+      var fetched = 0;
+
+      $.getJSON('books.json', function(books) {
+        console.log(books);
+        test_book = books[0];
+        max_pages = (test_book.pages > max_allowed_pages) ? max_allowed_pages : test_book.pages;
 			  init();
 			  animate();
       });
 
-      //init();
-      //animate();
-
-      function makeGrid() {
-        var size = 500, step = 25;
-        var geometry = new THREE.Geometry();
-        var  material = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } );
-        var color1 = new THREE.Color( 0x444444 ), color2 = new THREE.Color( 0x888888 );
-
-        for ( var i = - size; i <= size; i += step ) {
-          geometry.vertices.push( new THREE.Vector3( -size, 0, i ) );
-          geometry.vertices.push( new THREE.Vector3( size, 0, i ) );
-
-          geometry.vertices.push( new THREE.Vector3( i, 0, -size ) );
-          geometry.vertices.push( new THREE.Vector3( i, 0, size ) );
-
-          var color = i === 0 ? color1 : color2;
-
-          geometry.colors.push( color, color, color, color );
-
-        }
-        var grid = new THREE.Line( geometry, material, THREE.LinePieces );
-        scene.add( grid );
-      }
-
-      function makeWalls() {
-        //for(var i = 0; i < 4; i++) { //four walls
-          var wall = new THREE.Mesh(
-            new THREE.CubeGeometry(2000, 600, 10),
-            new THREE.MeshBasicMaterial({color: '0x00ff00'})
-          );
-          scene.add(wall);
-          wall.position.set(0, 345, -500);
-        //}
-      }
 
 			function init() {
 
-				//container = document.getElementById('container');
-				w = window.innerWidth;
-				h = window.innerHeight;
-				w2 = w / 2;
-				h2 = h / 2;
-				/*container.style.width = w + "px";
-				container.style.height = h + "px";
-				container.style.marginTop = 0.5 * (window.innerHeight-h) + 'px';*/
-
-        clock = new THREE.Clock();
-        deltaX = 0;
-        thetaD = 0;
-        old_mouseX = 0;
+				container=document.getElementById('container');
+				w=window.innerWidth;
+				h=window.innerHeight;
+				w2=w/2;
+				h2=h/2;
+				container.style.width=w+"px";
+				container.style.height=h+"px";
+				container.style.marginTop=0.5*(window.innerHeight-h)+'px';
 
 				scene = new THREE.Scene();
 
-				camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 1500);
-        camera.position.set(30, 365, 1000);
-				//camera.position.z = 100;
-				scene.add(camera);
+				camera = new THREE.PerspectiveCamera( 50, w / h, 1, 1000 );
+				camera.position.z = rad;
+				scene.add( camera );
 				projector = new THREE.Projector();
 
-        controls = new THREE.FirstPersonControls(camera);
-        controls.movementSpeed = MOVESPEED;
+				// webgl renderer gives better rendering without problems
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( w, h );
 
-        light = new THREE.AmbientLight(0x404040);
-        scene.add(light);
+				container.appendChild( renderer.domElement );
 
-        renderer = new THREE.WebGLRenderer({antialias: true});
-				renderer.setSize(w, h);
+				container.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
-				//container.appendChild(renderer.domElement);
-        document.body.appendChild(renderer.domElement);
-
-				//container.addEventListener('mousedown', onDocumentMouseDown, false);
-
-        renderer.domElement.addEventListener('mousemove', onMouseMove, false);
-
-				book = new FlipBook3D.Book();
-				book.pageWidth = pagew;
-				book.pageHeight = pageh;
-        book.position.y = 250;
-        book.rotation.set(-1.57, 0, 0);
+				book=new FlipBook3D.Book();
+				book.pageWidth=pagew;
+				book.pageHeight=pageh;
 				scene.add(book);
-				for(var i=0; i<images.length; i++) {
-          var texturefront = THREE.ImageUtils.loadTexture(images[i].f);
-          var textureback = THREE.ImageUtils.loadTexture(images[i].b);
-          book.addPage(texturefront, textureback, images[i].hard);
-				}
 
-        // add the loaded models to scene
-        for(var i in loaded_models) {
-          scene.add(loaded_models[i]);
+
+        for(var i=0; i<max_pages; i+=2) {
+          //var texturefront = t.ImageUtils.loadTexture(images[i].f);
+          var texturefront = THREE.ImageUtils.loadTexture(test_book.url + i + '.jpg');
+          var textureback = THREE.ImageUtils.loadTexture(test_book.url + (i+1) + '.jpg');
+          book.addPage(texturefront, textureback, 0);
+          fetched = i;
         }
+        console.log('fetched', fetched);
 
-        // event listeners for flipping page
-				fl = document.getElementById('flipleft');
-				fr = document.getElementById('flipright');
-        fl.addEventListener('click', function() {
-          book.pages[book.pages.length-book.flippedright].flipLeft();
+				fl=document.getElementById('flipleft');
+				fr=document.getElementById('flipright');
+        fl.addEventListener('click',function(){
+          book.pages[book.pages.length-book.flippedright].flipLeft()
+          prefetch();
         });
-        fr.addEventListener('click', function() {
-          book.pages[book.flippedleft-1].flipRight();
+        fr.addEventListener('click',function(){
+          book.pages[book.flippedleft-1].flipRight()
+          prefetch();
         });
 			}
 
-			function onDocumentMouseDown(event) {
+      function prefetch() {
+        var pageno = book.flippedleft * 2;
+        console.log('page no ', pageno);
+        if(test_book.pages < max_allowed_pages) {
+          return;
+        }
+        if(pageno <= fetched - 5) {
+          return;
+        }
+        console.log('fetching books..');
+        var load_pages = fetched + 20;
+        if(load_pages > test_book.pages) {
+          return;
+        }
+        for(var i = fetched + 1; i < load_pages; i += 2) {
+          var texturefront = THREE.ImageUtils.loadTexture(test_book.url + i + '.jpg');
+          var textureback = THREE.ImageUtils.loadTexture(test_book.url + (i+1) + '.jpg');
+          book.addPage(texturefront, textureback, 0);
+          fetched = i;
+        }
+      }
+
+			function onDocumentMouseDown( event ) {
 				event.preventDefault();
-				mouseX = ((event.clientX / w) * 2 - 1);
-				targetRotationY = mouseX;
-				mouseY = ((event.clientY / h) * 2 - 1);
-				targetRotationX = mouseY;
-				container.addEventListener('mousemove', onDocumentMouseMove, false);
-				container.addEventListener('mouseup', onDocumentMouseUp, false);
-				container.addEventListener('mouseout', onDocumentMouseOut, false);
+				mouseX=(( event.clientX / w ) * 2 - 1);
+				targetRotationY=mouseX;
+				mouseY=(( event.clientY / h ) * 2 - 1);
+				targetRotationX=mouseY;
+				container.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				container.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				container.addEventListener( 'mouseout', onDocumentMouseOut, false );
 			}
 
-			function onDocumentMouseMove(event) {
+			
+			function onDocumentMouseMove( event ) {
+
 				/*mouseX = event.clientX - w2;
 				mouseY = event.clientY - h2;
 
-				targetRotationY = targetRotationOnMouseDownY + (mouseX - mouseXOnMouseDown) * 0.02;
-				targetRotationX = targetRotationOnMouseDownX + (mouseY - mouseYOnMouseDown) * 0.02;*/
+				targetRotationY = targetRotationOnMouseDownY + ( mouseX - mouseXOnMouseDown ) * 0.02;
+				targetRotationX = targetRotationOnMouseDownX + ( mouseY - mouseYOnMouseDown ) * 0.02;*/
 				//var target=
 				//mouse_path.push(e.seenas.ray);
-				mouseX = ((event.clientX / w) * 2 - 1);
-				targetRotationY = mouseX;
-				mouseY = ((event.clientY / h) * 2 - 1);
-				targetRotationX = mouseY;
+				mouseX=(( event.clientX / w ) * 2 - 1);
+				targetRotationY=mouseX;
+				mouseY=(( event.clientY / h ) * 2 - 1);
+				targetRotationX=mouseY;
 			}
 
-			function onDocumentMouseUp(event) {
-				container.removeEventListener('mousemove', onDocumentMouseMove, false);
-				container.removeEventListener('mouseup', onDocumentMouseUp, false);
-				container.removeEventListener('mouseout', onDocumentMouseOut, false);
+			function onDocumentMouseUp( event ) {
+				container.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				container.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+				container.removeEventListener( 'mouseout', onDocumentMouseOut, false );
 			}
+			
 
-			function onDocumentMouseOut(event) {
-				container.removeEventListener('mousemove', onDocumentMouseMove, false);
-				container.removeEventListener('mouseup', onDocumentMouseUp, false);
-				container.removeEventListener('mouseout', onDocumentMouseOut, false);
+			function onDocumentMouseOut( event ) {
+
+				container.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				container.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+				container.removeEventListener( 'mouseout', onDocumentMouseOut, false );
 			}
-
-      function onMouseMove(event) {
-        deltaX = event.clientX - old_mouseX;
-        old_mouseX = event.clientX;
-      }
-
-      function fixMouseMove() {
-        thetaD -= deltaX * ACTUAL_LOOK_SPEED;
-        var theta = thetaD * Math.PI / 180;
-        var lookpoint = new THREE.Vector3(0, 0, 0);
-        lookpoint.set(Math.sin(theta), 0, Math.cos(theta));
-        lookpoint.addSelf(camera.position);
-        //lookpoint.add(_this.cam.position); //https://github.com/mrdoob/three.js/wiki/Migration :r54->r55
-        camera.lookAt(lookpoint);
-        deltaX = 0;
-      }
+			//
 
 			function animate() {
-				requestAnimationFrame(animate);
-				render();
-			}
 
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+			
+			function render2()
+			{
+				TWEEN.update();
+				renderer.render( scene, camera );
+			}
+			
 			function render() {
-				var multx = 0.5 * Math.PI;
-				var multy = -Math.PI;
-				/*camera.position.x = rad * Math.sin(targetRotationY * multy) * Math.cos(targetRotationX * multx);
-				camera.position.y = rad * Math.sin(targetRotationX * multx);
-				camera.position.z = rad * Math.cos(targetRotationY * multy) * Math.cos(targetRotationX * multx);
-				camera.lookAt(scene.position);*/
-        fixMouseMove();
-        TWEEN.update();
-				renderer.render(scene, camera);
-        controls.update(clock.getDelta());
+
+				var multx=0.5*Math.PI;
+				var multy=-Math.PI;
+				camera.position.x = rad * Math.sin( targetRotationY*multy ) * Math.cos( targetRotationX*multx );
+				camera.position.y = rad * Math.sin( targetRotationX*multx );
+				camera.position.z = rad * Math.cos( targetRotationY*multy ) * Math.cos( targetRotationX*multx );
+				camera.lookAt(scene.position);
+				render2();
 			}
 		</script>
-  </body>
-</html>
+</body></html>
