@@ -10,7 +10,6 @@ var FlipBook3D=FlipBook3D || {};
 // Book  Class-------------------------------------------------------------------------------------------
 FlipBook3D.Book=function()
 {
-	this.pages=null;
 	this.pageWidth=0;
 	this.pageHeight=0;
 	this.currentPage=0;

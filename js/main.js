@@ -32,7 +32,9 @@
     //Physijs.scripts.ammo = 'ammo.js';
 
     //this.loadBooks();
-    this.loadModels();
+    //this.loadModels();
+    _this.setup();
+    _this.initFlipBook();
   };
 
   _this.loadModels = function() {
@@ -151,9 +153,9 @@
 				_this.renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
 				_this.renderer.domElement.addEventListener('mousedown', onDocumentMouseUp, false);
 				//_this.renderer.domElement.addEventListener('mouseout', onDocumentMouseOut, false);
-        _this.scene.remove(_this.loaded_models[0]);
-        _this.book.scale.set(2,2,2);
-        _this.book.position.set(0, 500, -200);
+        //_this.scene.remove(_this.loaded_models[0]);
+        //_this.book.scale.set(2,2,2);
+        //_this.book.position.set(0, 500, -200);
 			}
 
 			function onDocumentMouseMove(event) {
@@ -168,7 +170,7 @@
 				targetRotationY = mouseY;
 				mouseY = ((event.clientY / h) * 2 - 1);
 				targetRotationX = mouseX;
-        _this.rotateBook();
+        //_this.rotateBook();
 			}
 
 			function onDocumentMouseUp(event) {
@@ -254,7 +256,9 @@
 			  //{f:"img/catalog_06.jpg", b:"img/catalog_01.jpg", hard:0},
 			  {f:"images/pg5.jpg", b:"images/bcover.png",hard:1}
       ];
-			//var book;
+
+      var book_pages_url = 'images/book/asta-shlokiyu/444x700/';
+
 			var pagew = 200, pageh = pagew * 10 / 7;
 
       this.book = new FlipBook3D.Book();
@@ -263,16 +267,17 @@
       this.book.position.y = 310;
       this.book.rotation.set(-1.57, 0, 0);
       this.scene.add(this.book);
-      for(var i=0; i<images.length; i++) {
-        var texturefront = THREE.ImageUtils.loadTexture(images[i].f);
-        var textureback = THREE.ImageUtils.loadTexture(images[i].b);
-        this.book.addPage(texturefront, textureback, images[i].hard);
+
+      for(var i=0; i<73; i+=2) {
+        //var texturefront = t.ImageUtils.loadTexture(images[i].f);
+        var texturefront = t.ImageUtils.loadTexture(book_pages_url + i + '.jpg');
+        var textureback = t.ImageUtils.loadTexture(book_pages_url + (i+1) + '.jpg');
+        this.book.addPage(texturefront, textureback, 0);
       }
       // event listeners for flipping page
       fl = document.getElementById('flipleft');
       fr = document.getElementById('flipright');
       fl.addEventListener('click', function() {
-        console.log(_this.book);
         var idx = _this.book.pages.length - _this.book.flippedright;
         _this.book.pages[idx].flipLeft();
       });
