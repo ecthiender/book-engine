@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title> Book Engine Demo </title>
 <meta charset="utf-8">
@@ -7,12 +7,12 @@
 	<style>
 	body
 	{
-	 background-color:#121212;
+	 /*background-color:#121212;*/
 	}
 	</style>
   <!--script src="../jquery-1.9.0.js"></script-->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-	<script type="text/javascript" src="js/lib/three.r46.js"></script>
+	<script type="text/javascript" src="js/lib/three.js"></script>
 	<script type="text/javascript" src="js/lib/MOD3.js"></script>
 	<script type="text/javascript" src="js/lib/Tween.js"></script>
 	<script type="text/javascript" src="js/lib/reqanim.js"></script>
@@ -27,7 +27,7 @@
 		<div id="container" style="position:relative;margin:0 auto;padding:0;z-index:0;cursor:pointer;"></div>
 		<script>
 			var container;
-			var camera, scene, renderer, projector, clock;
+			var camera, scene, renderer, projector, clock, mag_cam;
 
 			var targetRotationY = 0;
 			var targetRotationOnMouseDownY = 0;
@@ -43,13 +43,6 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 			var w,h,w2,h2;
-			var images=[{f:"img/catalog_13.jpg",b:"img/mag_page9.jpg", hard:1},
-			{f:"img/catalog_06.jpg",b:"img/catalog_05.jpg",hard:0},
-			{f:"img/catalog_05.jpg", b:"img/catalog_11.jpg" ,hard:0},
-			/*{f:"img/catalog_11.jpg" ,b:"img/catalog_12.jpg", hard:0},
-			{f:"img/catalog_09.jpg", b:"img/catalog_07.jpg", hard:0},
-			{f:"img/catalog_06.jpg", b:"img/catalog_01.jpg", hard:0},*/
-			{f:"img/catalog_04.jpg", b:"img/catalog_08.jpg",hard:1}];
 			var book, test_book;
 			var pagew=300;
 			var pageh=pagew*10/7;
@@ -62,7 +55,6 @@
       var controls;
 
       $.getJSON('books.json', function(books) {
-        console.log(books);
         test_book = books[0];
         max_pages = (test_book.pages > max_allowed_pages) ? max_allowed_pages : test_book.pages;
 			  init();
@@ -84,19 +76,38 @@
         clock = new THREE.Clock();
 				scene = new THREE.Scene();
 
-				camera = new THREE.PerspectiveCamera( 50, w / h, 0.1, 10000 );
-
-				camera.position.z = rad;
+				camera = new THREE.PerspectiveCamera( 45, w / h, 0.1, 10000 );
+        camera.position.z = rad;
 				scene.add( camera );
+
+        //book_cam = new THREE.PerspectiveCamera(45, w/h, 0.1, 1000);
+        //scene.add(book_cam);
+
+        /*mag_cam = new THREE.OrthographicCamera(
+          window.innerWidth / -4,// Left
+          window.innerWidth / 4,// Right
+          window.innerHeight / 4,// Top
+          window.innerHeight / -4,// Bottom
+          1,            // Near 
+          100);           // Far -- enough to see the skybox
+        //topCamera.up = new THREE.Vector3(0,0,-1)  ;*/
+        mag_cam  = new THREE.PerspectiveCamera(45, w/h, 0.1, 10000);
+        mag_cam.position.set(0, 0, 60);
+        mag_cam.lookAt(scene.position);
+        scene.add(mag_cam)    
+				
 				projector = new THREE.Projector();
 
 				// webgl renderer gives better rendering without problems
 				renderer = new THREE.WebGLRenderer();
 				renderer.setSize( w, h );
+        renderer.setClearColorHex( 0x000000, 1 );
+        renderer.autoClear = false;
 
 				container.appendChild( renderer.domElement );
 
 				container.addEventListener( 'mousedown', onDocumentMouseDown, false );
+        container.addEventListener( 'mousemove', onMousemoveForMag, false );
 
 				book=new FlipBook3D.Book();
 				book.pageWidth=pagew;
@@ -156,8 +167,8 @@
 				container.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				container.addEventListener( 'mouseup', onDocumentMouseUp, false );
 				container.addEventListener( 'mouseout', onDocumentMouseOut, false );
-				window.addEventListener( 'keydown', onKeyDown, false );
-				window.addEventListener( 'keyup', onKeyUp, false );
+				//window.addEventListener( 'keydown', onKeyDown, false );
+				//window.addEventListener( 'keyup', onKeyUp, false );
 			}
 
 			function onKeyDown(event) {
@@ -184,6 +195,28 @@
       function onKeyUp(event) {
       }
 
+      function onMousemoveForMag(event) {
+        var mousex = ((event.clientX / w) * 2 - 1);
+				var mousey = - ((event.clientY / h) * 2 - 1);
+        var vec = new THREE.Vector3(mousex, mousey, 0.5);
+        console.log(mousex, mousey);
+        projector.unprojectVector(vec, camera);
+        var raycaster = new THREE.Raycaster(camera.position, vec.sub(camera.position).normalize());
+        var intersects = raycaster.intersectObject(book, true);
+        if(intersects.length) {
+          //console.log(intersects);
+          //var intersected = intersects[0].object;
+          //console.log(intersected);
+          //mag_cam.position.copy(intersected.position);
+          //mag_cam.lookAt(intersected.position);
+          mag_cam.position.set(0 * book.pageWidth,0 * book.pageHeight, 60);
+          //console.log(mousex * book.pageWidth, mousey * book.pageHeight);
+          //console.log(book.pageWidth, book.pageHeight);
+          //mag_cam.position.set(0,0, 60);
+          //console.log(book.position);
+        }
+      }
+
 			function onDocumentMouseMove( event ) {
 
 				/*mouseX = event.clientX - w2;
@@ -197,6 +230,7 @@
 				targetRotationY=mouseX;
 				mouseY=(( event.clientY / h ) * 2 - 1);
 				targetRotationX=mouseY;
+        console.log(mouseX, mouseY);
 			}
 
 			function onDocumentMouseUp( event ) {
@@ -219,13 +253,25 @@
 				requestAnimationFrame( animate );
 
 				render();
-
 			}
 			
 			function render2()
 			{
+        var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 				TWEEN.update();
-				renderer.render( scene, camera );
+        // setViewport parameters:
+        //  lower_left_x, lower_left_y, viewport_width, viewport_height
+        renderer.setViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        renderer.clear(); 
+
+        // left side
+        renderer.setViewport( 1, 1, SCREEN_WIDTH - 200, SCREEN_HEIGHT);
+        renderer.render( scene, camera);
+
+        // right side
+        renderer.setViewport(SCREEN_WIDTH - 300, 50, 200, 200 );
+        renderer.render( scene, mag_cam);
+
 			}
 			
 			function render() {

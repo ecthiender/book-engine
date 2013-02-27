@@ -10,6 +10,7 @@ var FlipBook3D=FlipBook3D || {};
 // Book  Class-------------------------------------------------------------------------------------------
 FlipBook3D.Book=function()
 {
+	this.pages=null;
 	this.pageWidth=0;
 	this.pageHeight=0;
 	this.currentPage=0;
@@ -95,7 +96,8 @@ FlipBook3D.Page=function(book,i,matf,matb,hard,col)
 		}
 	}
 	// call super
-	THREE.Mesh.call(this, new THREE.CubeGeometry( this.pW, this.pH, 1, this.nfacesw, this.nfacesh, 1, this.mats ), new THREE.MeshFaceMaterial());
+	// Three.js has made materials added to FaceMaterial instead of CubeGeometry
+    THREE.Mesh.call(this, new THREE.CubeGeometry( this.pW, this.pH, 1, this.nfacesw, this.nfacesh, 1 ), new THREE.MeshFaceMaterial(this.mats));
 	this.overdraw=true;
 	this.position.x=this.pW*0.5;
 	this.position.z=-this.zz*this.index;
@@ -159,7 +161,7 @@ FlipBook3D.Page.prototype.renderFlip=function()
 		this.thiss.book.centerContainer.position.x=(1-this.xx)*this.thiss.book.centerContainer.position.x-this.xx*this.thiss.book.pageWidth*0.5;
 	else if (this.thiss.flippingRight && this.thiss.index==this.thiss.book.getNumPages()-1)
 		this.thiss.book.centerContainer.position.x=(1-this.xx)*this.thiss.book.centerContainer.position.x;
-
+		
 	// flip page
 	var tt=(1-Math.abs(this.t));
 	this.thiss.rotation.y = this.angle;
