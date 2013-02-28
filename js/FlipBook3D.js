@@ -65,7 +65,7 @@ FlipBook3D.Page=function(book,i,matf,matb,hard,col)
 	this.isFlippedRight=true;
 	this.flippingLeft=false
 	this.flippingRight=false;
-	this.zz=2;
+	this.zz=1;
 	this.pageColor=col;
 	this.sides={bottom:3,top:2,	right:0,left:1,	front:4,back:5};
 	

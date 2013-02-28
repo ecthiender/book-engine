@@ -23,17 +23,20 @@
 		<input type="button" id="flipleft" value="flipLeft" />
 		<br />
 		<input type="button" id="flipright" value="flipRight" />
+		<br />
+		<input type="button" id="magnify" value="Magnify Off"/>
 		</div>
 		<div id="container" style="position:relative;margin:0 auto;padding:0;z-index:0;cursor:pointer;"></div>
 		<script>
 			var container;
 			var camera, scene, renderer, projector, clock, mag_cam;
+      var clientX, clientY, magnify = false;
 
 			var targetRotationY = 0;
 			var targetRotationOnMouseDownY = 0;
 			var targetRotationX = 0;
 			var targetRotationOnMouseDownX = 0;
-			var rad=700;
+			var rad = 200;
 			var mouse={x:0,y:0};
 			var mouseX = 0;
 			var mouseXOnMouseDown = 0;
@@ -44,8 +47,8 @@
 			var windowHalfY = window.innerHeight / 2;
 			var w,h,w2,h2;
 			var book, test_book;
-			var pagew=300;
-			var pageh=pagew*10/7;
+			var pagew = 80;
+			var pageh = pagew * 10/7;
 			var fl,fr;
 
       var max_allowed_pages = 20;
@@ -134,11 +137,21 @@
           book.pages[book.flippedleft-1].flipRight()
           prefetch();
         });
+        var mag = document.getElementById('magnify');
+        mag.addEventListener('click', function(event) {
+          if(magnify == true) {
+            mag.value = "Magnify Off";
+            magnify = false;
+          }
+          else {
+            mag.value = "Magnify On";
+            magnify = true;
+          }
+        });
 			}
 
       function prefetch() {
         var pageno = book.flippedleft * 2;
-        console.log('page no ', pageno);
         if(test_book.pages < max_allowed_pages) {
           return;
         }
@@ -196,24 +209,25 @@
       }
 
       function onMousemoveForMag(event) {
+        clientX = event.clientX;
+        clientY = event.clientY;
         var mousex = ((event.clientX / w) * 2 - 1);
 				var mousey = - ((event.clientY / h) * 2 - 1);
-        var vec = new THREE.Vector3(mousex, mousey, 0.5);
-        console.log(mousex, mousey);
+        var vec = new THREE.Vector3(mousex, mousey, 0);
         projector.unprojectVector(vec, camera);
         var raycaster = new THREE.Raycaster(camera.position, vec.sub(camera.position).normalize());
+        //var intersects = raycaster.intersectObjects(book.pages, true);
         var intersects = raycaster.intersectObject(book, true);
         if(intersects.length) {
-          //console.log(intersects);
-          //var intersected = intersects[0].object;
-          //console.log(intersected);
-          //mag_cam.position.copy(intersected.position);
-          //mag_cam.lookAt(intersected.position);
-          mag_cam.position.set(0 * book.pageWidth,0 * book.pageHeight, 60);
-          //console.log(mousex * book.pageWidth, mousey * book.pageHeight);
-          //console.log(book.pageWidth, book.pageHeight);
-          //mag_cam.position.set(0,0, 60);
-          //console.log(book.position);
+          var pos = intersects[0].point;
+          //console.log(camera.position);
+          //var dir_vec = vec.sub(camera.position).normalize();
+          //console.log(dir_vec);
+          //var ray = new THREE.Raycaster(camera.position, dir_vec);
+          //var distance = -camera.position.z / dir_vec.z;
+          //var pos = camera.position.clone().add(dir_vec.multiplyScalar(distance));
+          //console.log(pos);
+          mag_cam.position.set(pos.x+25, pos.y, 10);
         }
       }
 
@@ -230,7 +244,6 @@
 				targetRotationY=mouseX;
 				mouseY=(( event.clientY / h ) * 2 - 1);
 				targetRotationX=mouseY;
-        console.log(mouseX, mouseY);
 			}
 
 			function onDocumentMouseUp( event ) {
@@ -269,8 +282,10 @@
         renderer.render( scene, camera);
 
         // right side
-        renderer.setViewport(SCREEN_WIDTH - 300, 50, 200, 200 );
-        renderer.render( scene, mag_cam);
+        if(magnify) {
+          renderer.setViewport(SCREEN_WIDTH - 300, 50, 200, 200);
+          renderer.render( scene, mag_cam);
+        }
 
 			}
 			
@@ -281,7 +296,6 @@
 				camera.position.x = rad * Math.sin( targetRotationY*multy ) * Math.cos( targetRotationX*multx );
 				camera.position.y = rad * Math.sin( targetRotationX*multx );
 				camera.position.z = rad * Math.cos( targetRotationY*multy ) * Math.cos( targetRotationX*multx );
-        //controls.update(clock.getDelta());
 				camera.lookAt(scene.position);
 				render2();
 			}
