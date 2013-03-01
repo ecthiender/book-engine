@@ -24,7 +24,7 @@
 		<br />
 		<input type="button" id="flipright" value="flipRight" />
 		<br />
-		<input type="button" id="magnify" value="Magnify Off"/>
+		<input type="button" id="magnify" value="Magnify is Off"/>
 		</div>
 		<div id="container" style="position:relative;margin:0 auto;padding:0;z-index:0;cursor:pointer;"></div>
 		<script>
@@ -140,11 +140,11 @@
         var mag = document.getElementById('magnify');
         mag.addEventListener('click', function(event) {
           if(magnify == true) {
-            mag.value = "Magnify Off";
+            mag.value = "Magnify is Off";
             magnify = false;
           }
           else {
-            mag.value = "Magnify On";
+            mag.value = "Magnify is On";
             magnify = true;
           }
         });
@@ -283,7 +283,7 @@
 
         // right side
         if(magnify) {
-          renderer.setViewport(SCREEN_WIDTH - 300, 50, 200, 200);
+          renderer.setViewport(SCREEN_WIDTH - 600, 50, 500, 500);
           renderer.render( scene, mag_cam);
         }
 
